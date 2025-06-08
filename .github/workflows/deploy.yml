@@ -1,0 +1,55 @@
+name: CI/CD to AWS EC2
+
+on:
+  push:
+    branches: [main]
+
+schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: 🧪 Run Tests
+        run: npm test -- --watchAll=false
+
+      - name: 🛠️ Build App
+        run: npm run build
+
+      - name: Copy Files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "dist/*"
+          target: ${{ secrets.EC2_TARGET_DIR }}
+
+      - name: Restart App on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+           set -e 
+           TIMESTAMP=$(date +"%Y-%m-%dT%H-%M")
+            RELEASE_DIR=~/site/releases/$TIMESTAMP
+            mkdir -p $RELEASE_DIR
+           cp -r ~/site/dist/* $RELEASE_DIR/
+           ln -sfn $RELEASE_DIR ~/site/current
+            pm2 serve ~/site/current 3000 --name vite-app || pm2 restart vite-app 
+            
