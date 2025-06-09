@@ -174,6 +174,18 @@ npm start
 
 - **Impact**: Ensures a cohesive and integrated user experience.
 
+# CI/CD Automation Workflow: Purpose, Functionalities, and Examples
+
+## What Is an Automation Workflow?
+
+An automation workflow in a CI/CD (Continuous Integration/Continuous Delivery) pipeline is a structured, repeatable process used to automatically build, test, and deploy software applications. These workflows are typically triggered by specific events, such as a code push to a repository, pull request, or scheduled execution.
+
+In systems like GitHub Actions, a workflow is defined using a `.yml` file within the `.github/workflows/` directory and executed in a virtual environment.
+
+... [truncated for clarity, but will use full content in the file]
+
+With the help of modern tools like GitHub Actions, AWS EC2, PM2, and NGINX, teams can streamline development and deliver applications at scale and with confidence.
+
 # CI/CD Infrastructure, Services, and Technologies
 
 To support modern software engineering practices, **The Book Application** incorporates a complete CI/CD (Continuous Integration and Continuous Delivery) pipeline. This pipeline is designed to automatically build, test, and deploy the application to a cloud-based environment with version tracking and persistent logging.
@@ -233,31 +245,9 @@ The CI/CD pipeline performs the following steps:
 
 ---
 
-## 3. Architecture Diagram (Text-Based)
+## 3. Architecture Diagram 
 
-```
-[ GitHub Repo ]
-      |
-      | Push or Schedule Trigger
-      v
-[ GitHub Actions Workflow ]
-      |
-  ┌───────────────┬──────────────┐
-  |               |              |
-[ Install Deps ] [ Run Tests ] [ Build React ]
-      |
-[ Package App & Upload to EC2 ]
-      |
-[ EC2 Release Folder (timestamped) ]
-      |
-[ PM2 + NGINX serve the app ]
-      |
-[ Logs stored in ~/logs/deploy.log ]
-      |
-[ post-deploy-check.yml verifies deployment ]
-```
-
----
+![Architecture Diagram ](./public/ADD.png)
 
 ## 4. Example GitHub Workflow Snippet
 
@@ -366,9 +356,5 @@ This project will be implementing the Javascript style for all program code. The
 **Reference** - https://www.w3schools.com/JS/js_conventions.asp
 
 
-GitHub repo: https://github.com/earvin-tech/Book_Application
+GitHub repo: https://github.com/tshort11/DEVOPS_CI-CD
 
-## Collaborators
-- [Tamika Short](https://github.com/tshort11)
-- [Earvin Tumpao](https://github.com/earvin-tech)
-- [Hammad Nasir](https://github.com/h4mm4)
