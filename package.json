@@ -25,4 +25,8 @@
     "globals": "^15.15.0",
     "vite": "^6.2.0"
   }
+  "scripts": {
+  "test": "jest --watchAll=false > logs/test-results.log",
+  "build": "vite build > logs/build.log"
+}
 }

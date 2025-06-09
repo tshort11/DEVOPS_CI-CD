@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
 
-schedule:
+  schedule:
     - cron: "0 6 * * *"
 
 jobs:
@@ -23,33 +23,36 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: 🧪 Run Tests
+      - name: Run Tests
         run: npm test -- --watchAll=false
 
       - name: 🛠️ Build App
         run: npm run build
 
-      - name: Copy Files to EC2
+      - name: Set Deployment Directory
+        id: vars
+        run: echo "dir=release-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Copy Files to EC2 with Revisions
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_KEY }}
-          source: "dist/*"
-          target: ${{ secrets.EC2_TARGET_DIR }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          source: "dist/"
+          target: "/var/www/${{ steps.vars.outputs.dir }}"
 
-      - name: Restart App on EC2
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Update Symlink to Latest Release
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
           script: |
-           set -e 
-           TIMESTAMP=$(date +"%Y-%m-%dT%H-%M")
-            RELEASE_DIR=~/site/releases/$TIMESTAMP
-            mkdir -p $RELEASE_DIR
-           cp -r ~/site/dist/* $RELEASE_DIR/
-           ln -sfn $RELEASE_DIR ~/site/current
-            pm2 serve ~/site/current 3000 --name vite-app || pm2 restart vite-app 
-            
+            ln -sfn /var/www/${{ steps.vars.outputs.dir }} /var/www/html
+
+      - name: Upload Logs as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-logs
+          path: logs/
